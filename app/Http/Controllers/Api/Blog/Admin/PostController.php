@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\Blog\Admin;
 
-use Illuminate\Http\Request;
+use App\Models\BlogPost;
+use App\Http\Requests\BlogPostCreateRequest;
+use App\Http\Requests\BlogPostUpdateRequest;
 use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
-use App\Http\Requests\BlogPostUpdateRequest;
 
 class PostController extends BaseController
 {
@@ -18,13 +19,19 @@ class PostController extends BaseController
 
     public function index()
     {
-        $paginator = $this->blogPostRepository->getAllWithPaginate();
-
-        return $paginator;
+        return $this->blogPostRepository->getAllWithPaginate();
     }
 
-    public function store(Request $request)
+    public function store(BlogPostCreateRequest $request)
     {
+        $data = $request->input();
+        $item = (new BlogPost())->create($data);
+
+        if ($item) {
+            return ['success' => 'Успішно збережено', 'id' => $item->id];
+        } else {
+            return ['msg' => 'Помилка збереження'];
+        }
     }
 
     public function show(string $id)
@@ -43,10 +50,7 @@ class PostController extends BaseController
         $result = $item->update($data);
 
         if ($result) {
-            return [
-                'success' => true,
-                'message' => 'Успішно збережено'
-            ];
+            return ['success' => true, 'message' => 'Успішно збережено'];
         } else {
             return ['message' => 'Помилка збереження'];
         }
@@ -54,5 +58,12 @@ class PostController extends BaseController
 
     public function destroy(string $id)
     {
+        $result = BlogPost::destroy($id);
+
+        if ($result) {
+            return ['success' => true, 'message' => 'Статтю видалено'];
+        } else {
+            return ['success' => false, 'message' => 'Помилка видалення'];
+        }
     }
 }
