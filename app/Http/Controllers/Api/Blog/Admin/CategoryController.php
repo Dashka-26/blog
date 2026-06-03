@@ -2,69 +2,60 @@
 
 namespace App\Http\Controllers\Api\Blog\Admin;
 
-// use App\Http\Controllers\Controller;
-//use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 use App\Models\BlogCategory;
-use Illuminate\Support\Str;
-use App\Http\Requests\BlogCategoryUpdateRequest;
+use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogCategoryCreateRequest;
+use App\Http\Requests\BlogCategoryUpdateRequest;
+use Illuminate\Support\Str;
 
 class CategoryController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
+    private $blogCategoryRepository;
+
+    public function __construct(BlogCategoryRepository $blogCategoryRepository)
+    {
+        parent::__construct();
+        $this->blogCategoryRepository = $blogCategoryRepository;
+    }
+
     public function index()
     {
-        // dd(__METHOD__);
-
-        $paginator = BlogCategory::paginate(5);
+        $paginator = $this->blogCategoryRepository->getAllWithPaginate(5);
 
         return $paginator;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(BlogCategoryCreateRequest $request)
     {
-        $data = $request->input(); // отримаємо масив даних, які надійшли з форми
+        $data = $request->input();
 
-        if (empty($data['slug'])) { // якщо псевдонім порожній
-            $data['slug'] = Str::slug($data['title']); // генеруємо псевдонім
+        if (empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['title']);
         }
 
-        $item = (new BlogCategory())->create($data); // створюємо об'єкт і додаємо в БД
+        $item = (new BlogCategory())->create($data);
 
         if ($item) {
-            return [
-                'success' => true,
-                'message' => 'Успішно збережено'
-            ];
+            return ['success' => true, 'message' => 'Успішно збережено', 'id' => $item->id];
         } else {
             return ['message' => 'Помилка збереження'];
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-
+        //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(BlogCategoryUpdateRequest $request, string $id)
     {
-        $item = BlogCategory::find($id);
+        $item = $this->blogCategoryRepository->getEdit($id);
 
         if (empty($item)) {
             return back()
-            ->withErrors(['msg' => "Запис id=[{$id}] не знайдено"])
-            ->withInput();
+                ->withErrors(['msg' => "Запис id=[{$id}] не знайдено"])
+                ->withInput();
         }
 
         $data = $request->all();
@@ -82,11 +73,8 @@ class CategoryController extends BaseController
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-
+        //
     }
 }
