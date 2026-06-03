@@ -7,6 +7,8 @@ use App\Http\Requests\BlogPostCreateRequest;
 use App\Http\Requests\BlogPostUpdateRequest;
 use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
+use App\Jobs\BlogPostAfterCreateJob;
+use App\Jobs\BlogPostAfterDeleteJob;
 
 class PostController extends BaseController
 {
@@ -20,18 +22,6 @@ class PostController extends BaseController
     public function index()
     {
         return $this->blogPostRepository->getAllWithPaginate();
-    }
-
-    public function store(BlogPostCreateRequest $request)
-    {
-        $data = $request->input();
-        $item = (new BlogPost())->create($data);
-
-        if ($item) {
-            return ['success' => 'Успішно збережено', 'id' => $item->id];
-        } else {
-            return ['msg' => 'Помилка збереження'];
-        }
     }
 
     public function show(string $id)
@@ -56,11 +46,28 @@ class PostController extends BaseController
         }
     }
 
+    public function store(BlogPostCreateRequest $request)
+    {
+        $data = $request->input();
+        $item = (new BlogPost())->create($data);
+
+        if ($item) {
+            $job = new BlogPostAfterCreateJob($item);
+            dispatch($job);
+
+            return ['success' => 'Успішно збережено', 'id' => $item->id];
+        } else {
+            return ['msg' => 'Помилка збереження'];
+        }
+    }
+
     public function destroy(string $id)
     {
         $result = BlogPost::destroy($id);
 
         if ($result) {
+            BlogPostAfterDeleteJob::dispatch($id)->delay(20);
+
             return ['success' => true, 'message' => 'Статтю видалено'];
         } else {
             return ['success' => false, 'message' => 'Помилка видалення'];
