@@ -29,11 +29,6 @@ class CategoryController extends BaseController
     public function store(BlogCategoryCreateRequest $request)
     {
         $data = $request->input();
-
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
         $item = (new BlogCategory())->create($data);
 
         if ($item) {
@@ -41,11 +36,6 @@ class CategoryController extends BaseController
         } else {
             return ['message' => 'Помилка збереження'];
         }
-    }
-
-    public function show(string $id)
-    {
-        //
     }
 
     public function update(BlogCategoryUpdateRequest $request, string $id)
@@ -59,11 +49,6 @@ class CategoryController extends BaseController
         }
 
         $data = $request->all();
-
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
         $result = $item->update($data);
 
         if ($result) {
@@ -71,6 +56,11 @@ class CategoryController extends BaseController
         } else {
             return ['msg' => 'Помилка збереження'];
         }
+    }
+
+    public function show(string $id)
+    {
+        //
     }
 
     public function destroy(string $id)

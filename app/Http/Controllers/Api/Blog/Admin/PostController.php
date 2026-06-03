@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
 
 class PostController extends BaseController
 {
@@ -42,15 +40,6 @@ class PostController extends BaseController
         }
 
         $data = $request->all();
-
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
-        if (empty($item->published_at) && isset($data['is_published']) && $data['is_published']) {
-            $data['published_at'] = Carbon::now();
-        }
-
         $result = $item->update($data);
 
         if ($result) {
