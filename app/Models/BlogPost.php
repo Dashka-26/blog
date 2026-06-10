@@ -23,6 +23,11 @@ class BlogPost extends Model
         'published_at',
     ];
 
+    protected $casts = [
+        'published_at' => 'datetime',
+        'is_published'  => 'boolean',
+    ];
+
     public function category()
     {
         return $this->belongsTo(BlogCategory::class);

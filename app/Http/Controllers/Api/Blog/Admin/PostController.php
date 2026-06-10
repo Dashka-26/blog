@@ -9,6 +9,7 @@ use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
 use App\Jobs\BlogPostAfterCreateJob;
 use App\Jobs\BlogPostAfterDeleteJob;
+use App\Http\Resources\Api\Blog\Admin\PostResource;
 
 class PostController extends BaseController
 {
@@ -21,7 +22,8 @@ class PostController extends BaseController
 
     public function index()
     {
-        return $this->blogPostRepository->getAllWithPaginate();
+        $paginator = $this->blogPostRepository->getAllWithPaginate();
+        return PostResource::collection($paginator);
     }
 
     public function show(string $id)

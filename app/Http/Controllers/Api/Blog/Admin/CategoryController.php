@@ -8,6 +8,7 @@ use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogCategoryCreateRequest;
 use App\Http\Requests\BlogCategoryUpdateRequest;
 use Illuminate\Support\Str;
+use App\Http\Resources\Api\Blog\Admin\CategoryResource;
 
 class CategoryController extends BaseController
 {
@@ -23,7 +24,7 @@ class CategoryController extends BaseController
     {
         $paginator = $this->blogCategoryRepository->getAllWithPaginate(5);
 
-        return $paginator;
+        return CategoryResource::collection($paginator);
     }
 
     public function store(BlogCategoryCreateRequest $request)
