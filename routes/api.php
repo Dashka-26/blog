@@ -13,25 +13,11 @@ Route::get('/user', function (Request $request) {
 Route::prefix('blog')->group(function () {
     Route::apiResource('posts', PostController::class)->names('blog.posts');
 });
-$groupData = [
-    'prefix' => 'admin/blog',
-];
 
-Route::group($groupData, function () {
-    $methods = ['index', 'store', 'update'];
-
+Route::group(['prefix' => 'admin/blog'], function () {
     Route::apiResource('categories', CategoryController::class)
-        ->only($methods)
-        ->names('blog.admin.categories');
-});
-Route::group($groupData, function () {
-    $methods = ['index', 'store', 'update'];
-
-    Route::apiResource('categories', CategoryController::class)
-        ->only($methods)
         ->names('blog.admin.categories');
 
-    Route::apiResource('posts', AdminPostController::class) // <-- змінили тут
-    ->except(['show'])
+    Route::apiResource('posts', AdminPostController::class)
         ->names('blog.admin.posts');
 });

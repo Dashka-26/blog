@@ -28,6 +28,13 @@ class PostController extends BaseController
 
     public function show(string $id)
     {
+        $item = BlogPost::find($id);
+
+        if (!$item) {
+            return response()->json(['success' => false, 'message' => 'Запис не знайдено'], 404);
+        }
+
+        return new PostResource($item);
     }
 
     public function update(BlogPostUpdateRequest $request, string $id)
@@ -35,17 +42,17 @@ class PostController extends BaseController
         $item = $this->blogPostRepository->getEdit($id);
 
         if (empty($item)) {
-            return ['message' => "Запис id=[{$id}] не знайдено"];
+            return response()->json(['success' => false, 'message' => "Запис id=[{$id}] не знайдено"], 404);
         }
 
         $data = $request->all();
         $result = $item->update($data);
 
         if ($result) {
-            return ['success' => true, 'message' => 'Успішно збережено'];
-        } else {
-            return ['message' => 'Помилка збереження'];
+            return response()->json(['success' => true, 'message' => 'Успішно збережено']);
         }
+
+        return response()->json(['success' => false, 'message' => 'Помилка збереження'], 500);
     }
 
     public function store(BlogPostCreateRequest $request)
@@ -57,10 +64,14 @@ class PostController extends BaseController
             $job = new BlogPostAfterCreateJob($item);
             dispatch($job);
 
-            return ['success' => 'Успішно збережено', 'id' => $item->id];
-        } else {
-            return ['msg' => 'Помилка збереження'];
+            return response()->json([
+                'success' => true,
+                'message' => 'Успішно збережено',
+                'id' => $item->id
+            ], 201);
         }
+
+        return response()->json(['success' => false, 'message' => 'Помилка збереження'], 500);
     }
 
     public function destroy(string $id)
@@ -70,9 +81,9 @@ class PostController extends BaseController
         if ($result) {
             BlogPostAfterDeleteJob::dispatch($id)->delay(20);
 
-            return ['success' => true, 'message' => 'Статтю видалено'];
-        } else {
-            return ['success' => false, 'message' => 'Помилка видалення'];
+            return response()->json(['success' => true, 'message' => 'Статтю видалено']);
         }
+
+        return response()->json(['success' => false, 'message' => 'Помилка видалення'], 500);
     }
 }
