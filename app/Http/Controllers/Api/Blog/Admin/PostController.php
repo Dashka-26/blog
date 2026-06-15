@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Blog\Admin;
 
+use Illuminate\Http\Request;
 use App\Models\BlogPost;
 use App\Http\Requests\BlogPostCreateRequest;
 use App\Http\Requests\BlogPostUpdateRequest;
@@ -20,9 +21,12 @@ class PostController extends BaseController
         parent::__construct();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $paginator = $this->blogPostRepository->getAllWithPaginate();
+        $perPage = $request->input('per_page', 5);
+        $search = $request->input('search');
+
+        $paginator = $this->blogPostRepository->getAllWithPaginate($perPage, $search);
         return PostResource::collection($paginator);
     }
 

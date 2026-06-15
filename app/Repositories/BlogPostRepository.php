@@ -12,11 +12,11 @@ class BlogPostRepository extends CoreRepository
         return Model::class;
     }
 
-    public function getAllWithPaginate()
+    public function getAllWithPaginate($perPage = null, $search = null)
     {
         $columns = ['id', 'title', 'slug', 'is_published', 'published_at', 'user_id', 'category_id'];
 
-        $result = $this->startConditions()
+        $query = $this->startConditions()
             ->select($columns)
             ->orderBy('id', 'DESC')
             ->with([
@@ -24,10 +24,13 @@ class BlogPostRepository extends CoreRepository
                     $query->select(['id', 'title']);
                 },
                 'user:id,name',
-            ])
-            ->paginate(25);
+            ]);
 
-        return $result;
+        if (!empty($search)) {
+            $query->where('title', 'LIKE', "%{$search}%");
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function getEdit($id)

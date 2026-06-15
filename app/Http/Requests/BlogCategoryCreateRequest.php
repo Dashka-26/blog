@@ -7,27 +7,38 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class BlogCategoryCreateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'title'       => 'required|min:5|max:200',
-            'slug'        => 'max:200',
-            'description' => 'string|max:500|min:3',
+            'slug'        => 'max:200|unique:blog_categories,slug',
+            'description' => 'nullable|string|min:3|max:500',
             'parent_id'   => 'required|integer|exists:blog_categories,id',
-            //
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Введіть назву категорії',
+            'title.min' => 'Назва категорії має містити щонайменше :min символів',
+            'title.max' => 'Назва категорії не може перевищувати :max символів',
+
+            'slug.max' => 'Слаг не може перевищувати :max символів',
+            'slug.unique' => 'Категорія з таким слагом вже існує. Придумайте інший',
+
+            'description.string' => 'Опис має бути текстовим',
+            'description.min' => 'Опис має містити щонайменше :min символів',
+            'description.max' => 'Опис не може перевищувати :max символів',
+
+            'parent_id.required' => 'Оберіть батьківську категорію',
+            'parent_id.integer' => 'ID категорії має бути числом',
+            'parent_id.exists' => 'Обраної батьківської категорії не існує',
         ];
     }
 }
